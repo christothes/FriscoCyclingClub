@@ -1,0 +1,14 @@
+{
+  "name": "FCC-site",
+  "description": "Frisco Cycling Club website",
+  "version": "0.0.0",
+  "homepage": "http://friscocycling.org",
+  "license": "Apache 2.0",
+  "private": true,
+  "dependencies": {
+    "angular": "1.2.x",
+    "angular-route": "1.2.x",
+    "angular-loader": "1.2.x",
+    "angular-mocks": "~1.2.15"
+  }
+}
