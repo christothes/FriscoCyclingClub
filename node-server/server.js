@@ -69,7 +69,7 @@ var graphConfig = {
 };
 
 // array to hold logged in users
-var users = [];
+var users = {};
 
 // AAD Graph Client for AAD queries
 var graphClient = null;
@@ -95,11 +95,9 @@ app.configure('development', function () {
 });
 
 var findByEmail = function (email, fn) {
-  for (var i = 0, len = users.length; i < len; i++) {
-    var user = users[i];
-    if (user.email === email) {
-      return fn(null, user);
-    }
+  var user = users[email];
+  if (user &&  user.email === email) {
+    return fn(null, user);
   }
   return fn(null, null);
 };
@@ -130,7 +128,8 @@ var wsfedStrategy = new wsfedsaml2(config,
         }
         if (!user) {
           // "Auto-registration"
-          users.push(profile);
+          users[profile.email] = profile;
+//          users.push(profile);
           return done(null, profile);
         }
         return done(null, user);
@@ -150,7 +149,8 @@ var graphQuery = function(res, user) {
     if(err) {
       res.end('GraphClient.getUsers error:' + err + '\n');
     } else {
-      res.render('index', { user: user, data: JSON.stringify(result) });
+      //res.render('index', { user: user, data: JSON.stringify(result) });
+      res.sendfile('/app/Index.html', {'root': '../'});
     }
     // get user properties (user.DisplayName, user.Mail, etc.)
   });
@@ -173,14 +173,16 @@ var doWaad = function(res, user) {
 
 app.get('/', function(req, res){
   if (req.user) {
-    doWaad(res, req.user);
+//    doWaad(res, req.user);
+    console.log('logged on user:' + req.user.email);
   } else {
     res.sendfile('/app/Index.html', {'root': '../'});
   }
+  res.sendfile('/app/Index.html', {'root': '../'});
 });
 
-app.get('/account', ensureAuthenticated, function(req, res){
-  res.render('account', { user:req.user });
+app.get('/account', ensureAuthenticated, function (req, res) {
+  res.json(req.user);
 });
 
 app.get('/login',
@@ -204,8 +206,8 @@ app.get('/logout', function(req, res){
 
 // We need to redirect the user to the WSFED logout endpoint so the
 // auth token will be revoked
-  wsfedStrategy.logout({}, function(err, url) {
-    if(err) {
+  wsfedStrategy.logout({}, function (err, url) {
+    if (err) {
       res.redirect('/');
     } else {
       res.redirect(url);
@@ -218,11 +220,13 @@ app.get('/logout', function(req, res){
 //   serialize users into and deserialize users out of the session.  Typically,
 //   this will be as simple as storing the user ID when serializing, and finding
 //   the user by ID when deserializing.
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function (user, done) {
+  console.log('serializeUser: ' + user.email);
   done(null, user.email);
 });
 
-passport.deserializeUser(function(id, done) {
+passport.deserializeUser(function (id, done) {
+  console.log('deserializeUser: ' + id);
   findByEmail(id, function (err, user) {
     done(err, user);
   });
@@ -234,3 +238,13 @@ app.get('/bower_components/*', function (req, res) {
     res.sendfile('/bower_components/' + req.params[0], {'root': '../'});
   }
 });
+
+// Simple route middleware to ensure user is authenticated.
+//   Use this route middleware on any resource that needs to be protected.  If
+//   the request is authenticated (typically via a persistent login session),
+//   the request will proceed.  Otherwise, the user will be redirected to the
+//   login page.
+function ensureAuthenticated(req, res, next) {
+  if (req.isAuthenticated()) { return next(); }
+  res.redirect('/login');
+}
