@@ -4,8 +4,46 @@
   <meta charset="utf-8">
   <title>Frisco Cycling Club</title>
   <link rel="stylesheet" href="css/app.css"/>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 </head>
 <body>
+<div class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">Frisco Cycling</a>
+        </div>
+        <div class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Home</a></li>
+                <li><a href="#/road">Road</a></li>
+                <li><a href="#/mtn">Mountain</a></li>
+                <li><a href="#/track">Track</a></li>
+                <!--<li class="dropdown">-->
+                    <!--<a href="#" class="dropdown-toggle" data-toggle="dropdown">Dropdown <b class="caret"></b></a>-->
+                    <!--<ul class="dropdown-menu">-->
+                        <!--<li><a href="#">Action</a></li>-->
+                        <!--<li><a href="#">Another action</a></li>-->
+                        <!--<li><a href="#">Something else here</a></li>-->
+                        <!--<li class="divider"></li>-->
+                        <!--<li class="dropdown-header">Nav header</li>-->
+                        <!--<li><a href="#">Separated link</a></li>-->
+                        <!--<li><a href="#">One more separated link</a></li>-->
+                    <!--</ul>-->
+                <!--</li>-->
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="/login">Login</a></li>
+            </ul>
+        </div><!--/.nav-collapse -->
+    </div>
+</div>
+<div class="container">
   <ul class="menu">
     <li><a href="#/view1">view1</a></li>
     <li><a href="#/view2">view2</a></li>
@@ -14,7 +52,7 @@
   <div ng-view></div>
 
   <div>Angular seed app: v<span app-version></span></div>
-
+</div>
   <!-- In production use:
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
   -->
@@ -25,5 +63,7 @@
   <script src="js/controllers.js"></script>
   <script src="js/filters.js"></script>
   <script src="js/directives.js"></script>
+  <script src="//code.jquery.com/jquery-2.1.0.min.js"></script>
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
 </body>
 </html>
