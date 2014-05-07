@@ -14,8 +14,7 @@
     "passport": "*",
     "passport-azure-ad": "*",
     "node-waad" : "*",
-    "socket.io" : "*",
-    "bower" : "*"
+    "socket.io" : "*"
   },
   "scripts": {
     "postinstall": "bower install",

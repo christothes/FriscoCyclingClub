@@ -76,7 +76,7 @@ var users = {};
 // AAD Graph Client for AAD queries
 var graphClient = null;
 
-app.configure(function (){
+app.configure(function () {
   app.set('port', process.env.PORT || 3000);
 //  app.set('views',__dirname + '/views');
 //  app.set('view engine', 'ejs');
@@ -89,7 +89,7 @@ app.configure(function (){
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(app.router);
-  app.use(express.static(__dirname + '/../app'));
+  app.use(express.static(__dirname + '/app'));
 });
 
 app.configure('development', function () {
@@ -185,9 +185,9 @@ app.get('/', function(req, res){
 //    doWaad(res, req.user);
     console.log('logged on user:' + req.user.email);
   } else {
-    res.sendfile('/app/Index.html', {'root': '../'});
+    res.sendfile('./app/Index.html', {'root': '../'});
   }
-  res.sendfile('/app/Index.html', {'root': '../'});
+  res.sendfile('./app/Index.html', {'root': '../'});
 });
 
 app.get('/account', ensureAuthenticated, function (req, res) {
