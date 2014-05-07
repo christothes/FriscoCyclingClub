@@ -13,8 +13,7 @@
     "express": "3.x",
     "passport": "*",
     "passport-azure-ad": "*",
-    "node-waad" : "*",
-    "socket.io" : "*"
+    "node-waad" : "*"
   },
   "scripts": {
     "postinstall": "bower install",
