@@ -26,9 +26,11 @@ var path = require('path');
 var passport = require('passport');
 var wsfedsaml2 = require('passport-azure-ad').WsfedStrategy;
 var waad = require('node-waad');
-//svar routes = require('./routes/routes');
+//var routes = require('./routes/routes');
 
 var app = express();
+var server = http.createServer(app);
+//var io = require('socket.io').listen(server);
 
 var config = {
   // Enter the App ID URI of your application. To find this value in the Windows Azure Management Portal,
@@ -74,7 +76,7 @@ var users = {};
 // AAD Graph Client for AAD queries
 var graphClient = null;
 
-app.configure(function(){
+app.configure(function (){
   app.set('port', process.env.PORT || 3000);
 //  app.set('views',__dirname + '/views');
 //  app.set('view engine', 'ejs');
@@ -82,12 +84,12 @@ app.configure(function(){
   app.use(express.logger('dev'));
   app.use(express.bodyParser());
   app.use(express.methodOverride());
-  app.use(express.cookieParser('your secret here'));
-  app.use(express.session({ secret: 'keyboard cat' }));
+  app.use(express.cookieParser(process.env.WAAD_CLIENTSECRET));
+  app.use(express.session({ secret: process.env.WAAD_CLIENTSECRET }));
   app.use(passport.initialize());
   app.use(passport.session());
   app.use(app.router);
-  app.use(express.static(path.join(__dirname, 'public')));
+  app.use(express.static(__dirname + '/../app'));
 });
 
 app.configure('development', function () {
@@ -108,28 +110,49 @@ var findByEmail = function (email, fn) {
 //   the request is authenticated (typically via a persistent login session),
 //   the request will proceed.  Otherwise, the user will be redirected to the
 //   login page.
-var ensureAuthenticated = function(req, res, next) {
+var ensureAuthenticated = function (req, res, next) {
   if (req.isAuthenticated()) {
     return next();
   }
   res.redirect('/login');
 };
 
+var getUserGroups = function (user) {
+  var u = user;
+  if (graphClient) {
+    //debug
+    graphClient.getUsers(function (err, users) {
+      console.log(users);
+    })
+    //end debug
+    graphClient.getGroupsForUserByEmail(u.email, function (err, groups) {
+      console.log('getGroupsForUserByObjectIdOrUpn ' + u.email);
+      if (err) {
+        console.error(err);
+      }
+      if (groups) {
+        console.log(groups);
+        users[u.email].groups = groups;
+      } else {console.log('no groups found for user');}
+    });
+  }
+}
+
 var wsfedStrategy = new wsfedsaml2(config,
-  function(profile, done) {
+  function (profile, done) {
     if (!profile.email) {
       return done(new Error("No email found"), null);
     }
     // asynchronous verification, for effect...
     process.nextTick(function () {
-      findByEmail(profile.email, function(err, user) {
+      findByEmail(profile.email, function (err, user) {
         if (err) {
           return done(err);
         }
         if (!user) {
           // "Auto-registration"
           users[profile.email] = profile;
-//          users.push(profile);
+          getUserGroups(profile);
           return done(null, profile);
         }
         return done(null, user);
@@ -140,34 +163,20 @@ var wsfedStrategy = new wsfedsaml2(config,
 
 passport.use(wsfedStrategy);
 
-http.createServer(app).listen(app.get('port'), function(){
+server.listen(app.get('port'), function(){
   console.log("Express server listening on port " + app.get('port'));
 });
 
-var graphQuery = function(res, user) {
-  graphClient.getUsers(function(err, result) {
-    if(err) {
-      res.end('GraphClient.getUsers error:' + err + '\n');
-    } else {
-      //res.render('index', { user: user, data: JSON.stringify(result) });
-      res.sendfile('/app/Index.html', {'root': '../'});
-    }
-    // get user properties (user.DisplayName, user.Mail, etc.)
-  });
-};
-
-var doWaad = function(res, user) {
-  if(graphClient === null) {
-    waad.getGraphClientWithClientCredentials2(graphConfig.tenant, graphConfig.clientid, graphConfig.clientsecret, function(err, client) {
-      if(err) {
-        res.end('waad.getGraphClientWithClientCredentials2 error:' + err + '\n');
+var doWaad = function () {
+  if (graphClient === null) {
+    waad.getGraphClientWithClientCredentials2(graphConfig.tenant, graphConfig.clientid, graphConfig.clientsecret, function (err, client) {
+      if (err) {
+        console.error('waad.getGraphClientWithClientCredentials2 error:' + err + '\n');
       } else {
+        console.log('got waad client');
         graphClient = client;
-        graphQuery(res, user);
       }
     });
-  } else {
-    graphQuery(res, user);
   }
 };
 
@@ -187,15 +196,15 @@ app.get('/account', ensureAuthenticated, function (req, res) {
 
 app.get('/login',
   passport.authenticate('wsfed-saml2', { failureRedirect: '/', failureFlash: true }),
-  function(req, res) {
+  function (req, res) {
     res.redirect('/');
   }
 );
 
 app.post('/login/callback',
   passport.authenticate('wsfed-saml2', { failureRedirect: '/', failureFlash: true }),
-  function(req, res) {
-    res.redirect('/');
+  function (req, res) {
+    res.redirect('/#/loggedIn');
   }
 );
 
@@ -232,7 +241,6 @@ passport.deserializeUser(function (id, done) {
   });
 });
 
-app.use(express.static(__dirname + '/../app'));
 app.get('/bower_components/*', function (req, res) {
   if (req.params['0']) {
     res.sendfile('/bower_components/' + req.params[0], {'root': '../'});
@@ -248,3 +256,12 @@ function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
   res.redirect('/login');
 }
+
+//io.sockets.on('connection', function (socket) {
+//  socket.emit('news', { hello: 'world' });
+//  socket.on('my other event', function (data) {
+//    console.log(data);
+//  });
+//});
+
+doWaad();
