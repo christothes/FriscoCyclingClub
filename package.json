@@ -5,7 +5,7 @@
   "description": "The Frisco Cycling Club website",
   "repository": "https://github.com/christothes/FriscoCyclingClub",
   "license": "Apache 2.0",
-  "devDependencies": {
+  "dependencies": {
     "karma": "~0.10",
     "protractor": "~0.17.0",
     "http-server": "^0.6.1",
@@ -19,7 +19,7 @@
   "scripts": {
     "postinstall": "bower install",
 
-    "start": "http-server -p 8000",
+    "start": "node server.js",
     "test": "karma start test/karma.conf.js",
 
     "update-webdriver": "webdriver-manager update",
