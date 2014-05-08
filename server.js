@@ -185,9 +185,9 @@ app.get('/', function(req, res){
 //    doWaad(res, req.user);
     console.log('logged on user:' + req.user.email);
   } else {
-    res.sendfile('./app/Index.html', {'root': '../'});
+    res.sendfile('./app/Index.html');
   }
-  res.sendfile('./app/Index.html', {'root': '../'});
+  res.sendfile('./app/Index.html');
 });
 
 app.get('/account', ensureAuthenticated, function (req, res) {
@@ -243,7 +243,7 @@ passport.deserializeUser(function (id, done) {
 
 app.get('/bower_components/*', function (req, res) {
   if (req.params['0']) {
-    res.sendfile('/bower_components/' + req.params[0], {'root': '../'});
+    res.sendfile('./bower_components/' + req.params[0]);
   }
 });
 
