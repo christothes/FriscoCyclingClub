@@ -4,7 +4,13 @@
   <meta charset="utf-8">
   <title>Frisco Cycling Club</title>
   <link rel="stylesheet" href="css/app.css"/>
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <script type="text/javascript">
+        window.appInsights={queue:[],applicationInsightsId:null,accountId:null,appUserId:null,configUrl:null,start:function(n){function u(n,t){n[t]=function(){var i=arguments;n.queue.push(function(){n[t].apply(n,i)})}}function f(n){var t=document.createElement("script");return t.type="text/javascript",t.src=n,t.async=!0,t}function r(){i.appendChild(f("//az416426.vo.msecnd.net/scripts/ai.0.js"))}var i,t;this.applicationInsightsId=n;u(this,"logEvent");u(this,"logPageView");i=document.getElementsByTagName("script")[0].parentNode;this.configUrl===null?r():(t=f(this.configUrl),t.onload=r,t.onerror=r,i.appendChild(t));this.start=function(){}}};
+
+        appInsights.start("5d918148-47c5-4929-8ec2-9cc7053a1b33");
+        appInsights.logPageView();
+    </script>
 </head>
 <body>
 <div class="navbar navbar-default navbar-fixed-top" role="navigation">
@@ -50,8 +56,6 @@
   </ul>
 
   <div ng-view></div>
-
-  <div>Angular seed app: v<span app-version></span></div>
 </div>
   <!-- In production use:
   <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>

@@ -11,8 +11,9 @@ angular.module('myApp', [
 ]).
 config(['$routeProvider', function ($routeProvider) {
     $routeProvider.when('/', {templateUrl: 'partials/home.html', controller: 'HomeCtrl'});
-    $routeProvider.when('/view1', {templateUrl: 'partials/partial1.html', controller: 'HomeCtrl'});
-    $routeProvider.when('/view2', {templateUrl: 'partials/partial2.html', controller: 'HomeCtrl'});
+    $routeProvider.when('/road', {templateUrl: 'partials/road.html', controller: 'HomeCtrl'});
+    $routeProvider.when('/mtn', {templateUrl: 'partials/mtn.html', controller: 'HomeCtrl'});
+    $routeProvider.when('/track', {templateUrl: 'partials/track.html', controller: 'HomeCtrl'});
     $routeProvider.when('/loggedIn', {templateUrl: 'partials/partial2.html', controller: 'HomeCtrl'});
     $routeProvider.otherwise({redirectTo: '/view1'});
 }]);
