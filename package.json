@@ -10,7 +10,8 @@
     "passport": "*",
     "passport-azure-ad": "*",
     "node-waad" : "*",
-    "bower" : "*"
+    "bower" : "*",
+    "promise": "5.x"
   },
   "devDependencies" : {
     "karma": "~0.10",

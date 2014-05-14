@@ -26,7 +26,7 @@ var path = require('path');
 var passport = require('passport');
 var wsfedsaml2 = require('passport-azure-ad').WsfedStrategy;
 var waad = require('node-waad');
-//var routes = require('./routes/routes');
+var Promise = require('promise');
 
 var app = express();
 var server = http.createServer(app);
@@ -112,30 +112,47 @@ var findByEmail = function (email, fn) {
 //   login page.
 var ensureAuthenticated = function (req, res, next) {
   if (req.isAuthenticated()) {
+    console.log('ensureAuthenticated');
     return next();
   }
   res.redirect('/login');
 };
 
-var getUserGroups = function (user) {
-  var u = user;
-  if (graphClient) {
-    //debug
-    graphClient.getUsers(function (err, users) {
-      console.log(users);
-    })
-    //end debug
-    graphClient.getGroupsForUserByEmail(u.email, function (err, groups) {
-      console.log('getGroupsForUserByObjectIdOrUpn ' + u.email);
-      if (err) {
-        console.error(err);
-      }
-      if (groups) {
-        console.log(groups);
-        users[u.email].groups = groups;
-      } else {console.log('no groups found for user');}
-    });
+var ensureUserIsAdmin = function (req, res, next) {
+  if (req.user.groups.some(function (element) {
+    return element.displayName === 'Admin';}))
+  {
+    console.log('ensureUserIsAdmin');
+    return next();
   }
+  res.redirect('/#/denied');
+}
+
+var getUserGroups = function (user) {
+  console.log('getUserGroups');
+  var promise = new Promise(function (resolve, reject) {
+    var u = user;
+    if (graphClient) {
+      graphClient.getGroupsForUserByObjectIdOrUpn(u.email, function (err, groups) {
+        console.log('returned from getGroupsForUserByObjectIdOrUpn ' + u.email);
+        if (err) {
+          console.error(err);
+          reject(err);
+        }
+        if (groups) {
+          //console.log(groups);
+          users[u.email].groups = groups;
+          resolve(groups);
+        } else {
+          console.log('no groups found for user');
+          reject("no groups found for user")
+        }
+      });
+    } else {
+      reject("Failure to get graphClient");
+    }
+  })
+  return promise;
 }
 
 var wsfedStrategy = new wsfedsaml2(config,
@@ -143,20 +160,28 @@ var wsfedStrategy = new wsfedsaml2(config,
     if (!profile.email) {
       return done(new Error("No email found"), null);
     }
+
     // asynchronous verification, for effect...
     process.nextTick(function () {
-      findByEmail(profile.email, function (err, user) {
-        if (err) {
-          return done(err);
-        }
-        if (!user) {
-          // "Auto-registration"
-          users[profile.email] = profile;
-          getUserGroups(profile);
-          return done(null, profile);
-        }
-        return done(null, user);
+      users[profile.email] = profile;
+      getUserGroups(profile).then(function (result) {
+        return done(null, profile);
+      }, function (err) {
+        console.log(err);
       });
+
+//      findByEmail(profile.email, function (err, user) {
+//        if (err) {
+//          return done(err);
+//        }
+//        if (!user) {
+//          // "Auto-registration"
+//          users[profile.email] = profile;
+//          getUserGroups(profile);
+//          return done(null, profile);
+//        }
+//        return done(null, user);
+//      });
     });
   }
 );
@@ -169,7 +194,7 @@ server.listen(app.get('port'), function(){
 
 var doWaad = function () {
   if (graphClient === null) {
-    waad.getGraphClientWithClientCredentials2(graphConfig.tenant, graphConfig.clientid, graphConfig.clientsecret, function (err, client) {
+    waad.getGraphClient10(graphConfig.tenant, graphConfig.clientid, graphConfig.clientsecret, function (err, client) {
       if (err) {
         console.error('waad.getGraphClientWithClientCredentials2 error:' + err + '\n');
       } else {
@@ -182,16 +207,11 @@ var doWaad = function () {
 
 app.get('/', function(req, res){
   if (req.user) {
-//    doWaad(res, req.user);
     console.log('logged on user:' + req.user.email);
   } else {
     res.sendfile('./app/Index.html');
   }
   res.sendfile('./app/Index.html');
-});
-
-app.get('/account', ensureAuthenticated, function (req, res) {
-  res.json(req.user);
 });
 
 app.get('/login',
@@ -204,7 +224,8 @@ app.get('/login',
 app.post('/login/callback',
   passport.authenticate('wsfed-saml2', { failureRedirect: '/', failureFlash: true }),
   function (req, res) {
-    res.redirect('/#/loggedIn');
+//    res.redirect('/#/loggedIn');
+    res.redirect('/account');
   }
 );
 
@@ -247,15 +268,17 @@ app.get('/bower_components/*', function (req, res) {
   }
 });
 
-// Simple route middleware to ensure user is authenticated.
-//   Use this route middleware on any resource that needs to be protected.  If
-//   the request is authenticated (typically via a persistent login session),
-//   the request will proceed.  Otherwise, the user will be redirected to the
-//   login page.
-function ensureAuthenticated(req, res, next) {
-  if (req.isAuthenticated()) { return next(); }
-  res.redirect('/login');
-}
+//
+// Web APIs
+//
+
+app.get('/account', ensureAuthenticated, ensureUserIsAdmin, function (req, res) {
+  res.json(req.user);
+});
+
+app.get
+
+///////
 
 //io.sockets.on('connection', function (socket) {
 //  socket.emit('news', { hello: 'world' });

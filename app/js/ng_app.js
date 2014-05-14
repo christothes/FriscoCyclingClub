@@ -15,5 +15,6 @@ config(['$routeProvider', function ($routeProvider) {
     $routeProvider.when('/mtn', {templateUrl: 'partials/mtn.html', controller: 'HomeCtrl'});
     $routeProvider.when('/track', {templateUrl: 'partials/track.html', controller: 'HomeCtrl'});
     $routeProvider.when('/loggedIn', {templateUrl: 'partials/partial2.html', controller: 'HomeCtrl'});
+    $routeProvider.when('/denied', {templateUrl: 'partials/denied.html', controller: 'HomeCtrl'});
     $routeProvider.otherwise({redirectTo: '/view1'});
 }]);
