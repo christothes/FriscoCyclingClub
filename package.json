@@ -11,7 +11,8 @@
     "passport-azure-ad": "*",
     "node-waad" : "*",
     "bower" : "*",
-    "promise": "5.x"
+    "promise": "5.x",
+    "paypal-ipn": "*"
   },
   "devDependencies" : {
     "karma": "~0.10",

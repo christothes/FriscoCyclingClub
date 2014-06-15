@@ -27,6 +27,7 @@ var passport = require('passport');
 var wsfedsaml2 = require('passport-azure-ad').WsfedStrategy;
 var waad = require('node-waad');
 var Promise = require('promise');
+var ipn = require('paypal-ipn');
 
 var app = express();
 var server = http.createServer(app);
@@ -120,7 +121,7 @@ var ensureAuthenticated = function (req, res, next) {
 
 var ensureUserIsAdmin = function (req, res, next) {
   if (req.user.groups.some(function (element) {
-    return element.displayName === 'Admin';}))
+    return element.displayName === 'Admin'; }))
   {
     console.log('ensureUserIsAdmin');
     return next();
@@ -276,9 +277,21 @@ app.get('/account', ensureAuthenticated, ensureUserIsAdmin, function (req, res) 
   res.json(req.user);
 });
 
-app.get
+app.post('/paypalIPN', function (req, res) {
 
-///////
+  ipn.verify(req.body, function callback(err, msg) {
+    if (err) {
+      console.error(msg);
+    } else {
+      //Do stuff with original params here
+
+      if (req.body.payment_status == 'Completed') {
+        //Payment has been confirmed as completed
+        console.log('payment completed');
+      }
+    }
+  });
+});
 
 //io.sockets.on('connection', function (socket) {
 //  socket.emit('news', { hello: 'world' });

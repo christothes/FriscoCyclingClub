@@ -3,9 +3,9 @@
 /* Controllers */
 
 angular.module('myApp.controllers', [])
-  .controller('HomeCtrl', [function () {
-
+  .controller('AppCtrl', ['$scope', function ($scope) {
+    console.log("AppCtrl");
   }])
-  .controller('StoreCtrl', [function () {
-
+  .controller('StoreCtrl', ['$scope', function ($scope) {
+    console.log("StoreCtrl");
   }]);
