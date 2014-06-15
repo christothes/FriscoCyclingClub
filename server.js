@@ -278,7 +278,7 @@ app.get('/account', ensureAuthenticated, ensureUserIsAdmin, function (req, res) 
 });
 
 app.post('/paypalIPN', function (req, res) {
-
+  console.log("IPN received");
   res.send(200); //respond to the IPN immediately
   ipn.verify(req.body, function callback(err, msg) {
     if (err) {
@@ -289,6 +289,10 @@ app.post('/paypalIPN', function (req, res) {
       if (req.body.payment_status == 'Completed') {
         //Payment has been confirmed as completed
         console.log('payment completed');
+        console.log(req.body);
+      } else {
+        console.log('** payment NOT COMPLETE');
+        console.log(req.body);
       }
     }
   });
