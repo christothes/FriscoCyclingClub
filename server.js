@@ -279,6 +279,7 @@ app.get('/account', ensureAuthenticated, ensureUserIsAdmin, function (req, res) 
 
 app.post('/paypalIPN', function (req, res) {
 
+  res.send(200); //respond to the IPN immediately
   ipn.verify(req.body, function callback(err, msg) {
     if (err) {
       console.error(msg);
