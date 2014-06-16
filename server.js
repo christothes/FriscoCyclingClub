@@ -290,7 +290,7 @@ app.post('/paypalIPN', function (req, res) {
         //Payment has been confirmed as completed
         console.log('payment completed');
         console.log(req.body);
-      } else {
+      } else if(req.body.payment_status) {
         console.log('** payment NOT COMPLETE');
         console.log(req.body);
       }
